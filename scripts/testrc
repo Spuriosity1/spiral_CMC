@@ -1,0 +1,23 @@
+function visualise_state {
+
+    local L=${L:-4}
+    local dir
+
+    runlog="runlog.txt"
+
+    build/anneal_and_quench --J1 -1 "$@" -o ../tmp -s 0x0a103  $L --save_state \
+        2>/dev/null | tee $runlog
+
+    dir=$( grep "Saving spin state" $runlog \
+        | sed 's/.*to //'
+    )
+
+    if [[ -z "$dir" ]]; then
+        echo "Error: no output file found" >&2
+        return 1
+    fi
+
+    printf '%s\n' "$dir"
+
+    python3 scripts/spinvis.py "$dir"
+}
